@@ -20,6 +20,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+
+
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -39,47 +45,60 @@ class MainActivity : ComponentActivity() {
                 ) {
                     val context = LocalContext.current
                     val scrollState = rememberScrollState()
-                    AlertDialogExample(
-                        onDismiss = {
-                            Toast.makeText(
-                                context,
-                                "no permission accepted",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        },
-                        onConfirmation = {
-                            Toast.makeText(
-                                context,
-                                "permission accepted",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        },
-                        dialogTitle = "Alert dialog example",
-                        dialogText = {
-                            Box(
-                                modifier = Modifier
-                                    .height(200.dp) // 원하는 높이 지정
-                                    .verticalScroll(scrollState)
-                                    .padding(end = 12.dp)
+                    var showDialog by remember {
+                        mutableStateOf(true)
+                    }
+                    if(showDialog){
+                        AlertDialogExample(
+                            onRequest = {
+                                showDialog = false
+                            },
+                            onDismiss = {
+                                Toast.makeText(
+                                    context,
+                                    "no permission accepted",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                showDialog = false
+                            },
+                            onConfirmation = {
+                                Toast.makeText(
+                                    context,
+                                    "permission accepted",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                showDialog = false
+                            },
+                            dialogTitle = "Alert dialog example",
+                            dialogText = {
+                                Box(
+                                    modifier = Modifier
+                                        .height(200.dp) // 원하는 높이 지정
+                                        .verticalScroll(scrollState)
+                                        .padding(end = 12.dp)
 
-                            ) {
-                                Text(
-                                    text = "This is an example of an alert dialog with buttons.\n".repeat(50) // 긴 텍스트 예시
-                                )
-                            }
+                                ) {
+                                    Text(
+                                        text = "This is an example of an alert dialog with buttons.\n".repeat(50) // 긴 텍스트 예시
+                                    )
+                                }
 
-                        },
-                        icon = Icons.Default.Info
-                    )
+                            },
+                            icon = Icons.Default.Info
+                        )
+                    }
+
                 }
             }
         }
     }
 }
 
+// return point
 
 @Composable
 fun AlertDialogExample(
+    onRequest: () -> Unit,
     onDismiss: () -> Unit,
     onConfirmation: () -> Unit,
     dialogTitle: String,
@@ -90,7 +109,7 @@ fun AlertDialogExample(
         icon = { Icon(icon, contentDescription = null) },
         title = { Text(text = dialogTitle) },
         text = { dialogText() },
-        onDismissRequest = onDismiss,
+        onDismissRequest = onRequest,
         confirmButton = {
             TextButton(onClick = onConfirmation) {
                 Text("Confirm")
@@ -100,38 +119,39 @@ fun AlertDialogExample(
             Button(onClick = onDismiss) {
                 Text("Dismiss")
             }
-        }
+        },
+
     )
 }
 
 
-@Preview
-@Composable
-fun AlertDialogExamplePreview() {
-    val context = LocalContext.current
-
-
-    Row(
-        Modifier.fillMaxSize()
-    ) {
-
-    }
-    AlertDialogExample(
-        onDismiss = {
-            Toast.makeText(context, "no permission accepted", Toast.LENGTH_SHORT).show()
-        },
-        onConfirmation = {
-            Toast.makeText(context, "permission accepted", Toast.LENGTH_SHORT).show()
-        },
-        dialogTitle = "Alert dialog example",
-        dialogText = {
-            Text(
-                text = "This is an example of an alert dialog with buttons.".repeat(50)
-            )
-        },
-        icon = Icons.Default.Info
-    )
-}
+//@Preview
+//@Composable
+//fun AlertDialogExamplePreview() {
+//    val context = LocalContext.current
+//
+//
+//    Row(
+//        Modifier.fillMaxSize()
+//    ) {
+//
+//    }
+//    AlertDialogExample(
+//        onDismiss = {
+//            Toast.makeText(context, "no permission accepted", Toast.LENGTH_SHORT).show()
+//        },
+//        onConfirmation = {
+//            Toast.makeText(context, "permission accepted", Toast.LENGTH_SHORT).show()
+//        },
+//        dialogTitle = "Alert dialog example",
+//        dialogText = {
+//            Text(
+//                text = "This is an example of an alert dialog with buttons.".repeat(50)
+//            )
+//        },
+//        icon = Icons.Default.Info
+//    )
+//}
 
 
 
