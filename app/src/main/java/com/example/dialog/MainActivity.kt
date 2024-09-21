@@ -6,7 +6,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -24,6 +26,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 
 
 import androidx.compose.ui.Modifier
@@ -39,62 +42,111 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             DialogTheme {
+                val context = LocalContext.current
+                val scrollState = rememberScrollState()
+                var onBackgroundTap by remember {
+                    mutableStateOf(true)
+                }
 
-                Row(
-                    Modifier.fillMaxSize()
-                ) {
-                    val context = LocalContext.current
-                    val scrollState = rememberScrollState()
-                    var showDialog by remember {
-                        mutableStateOf(true)
-                    }
-                    if(showDialog){
-                        AlertDialogExample(
-                            onRequest = {
-                                showDialog = false
-                            },
-                            onDismiss = {
-                                Toast.makeText(
-                                    context,
-                                    "no permission accepted",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                                showDialog = false
-                            },
-                            onConfirmation = {
-                                Toast.makeText(
-                                    context,
-                                    "permission accepted",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                                showDialog = false
-                            },
-                            dialogTitle = "Alert dialog example",
-                            dialogText = {
-                                Box(
-                                    modifier = Modifier
-                                        .height(200.dp) // 원하는 높이 지정
-                                        .verticalScroll(scrollState)
-                                        .padding(end = 12.dp)
 
-                                ) {
-                                    Text(
-                                        text = "This is an example of an alert dialog with buttons.\n".repeat(50) // 긴 텍스트 예시
-                                    )
-                                }
+                if (onBackgroundTap) {
+                    JoinScreen(
+                        onRequest = {
+                            onBackgroundTap = false
+                        },
+                        onDismiss = {
+                            Toast.makeText(
+                                context,
+                                "no permission accepted",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            onBackgroundTap = false
+                        },
+                        onConfirmation = {
+                            Toast.makeText(
+                                context,
+                                "permission accepted",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            onBackgroundTap = false
+                        },
+                        dialogTitle = "Alert dialog example",
+                        dialogText = {
+                            Box(
+                                modifier = Modifier
+                                    .height(200.dp) // 원하는 높이 지정
+                                    .verticalScroll(scrollState)
+                                    .padding(end = 12.dp)
 
-                            },
-                            icon = Icons.Default.Info
-                        )
-                    }
+                            ) {
+                                Text(
+                                    text = "This is an example of an alert dialog with buttons.\n".repeat(
+                                        50
+                                    ) // 긴 텍스트 예시
+                                )
+                            }
 
+                        },
+                        icon = Icons.Default.Info
+                    )
                 }
             }
         }
     }
 }
 
-// return point
+
+@Composable
+fun JoinScreen(
+    onRequest: () -> Unit,
+    onDismiss: () -> Unit,
+    onConfirmation: () -> Unit,
+    dialogTitle: String,
+    dialogText: @Composable () -> Unit,
+    icon: ImageVector,
+) {
+    var showDialog by remember {
+        mutableStateOf(false)
+    }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(32.dp),
+
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Button(onClick = {
+            showDialog = !showDialog
+
+        }) {
+            Text(text = "Do you want join the chat")
+        }
+        Spacer(modifier = Modifier.height(32.dp))
+        if (showDialog) {
+            AlertDialog(
+                icon = { Icon(icon, contentDescription = null) },
+                title = { Text(text = dialogTitle) },
+                text = { dialogText() },
+                onDismissRequest = onRequest,
+                confirmButton = {
+                    TextButton(onClick = onConfirmation) {
+                        Text("Confirm")
+                    }
+                },
+                dismissButton = {
+                    Button(onClick = onDismiss) {
+                        Text("Dismiss")
+                    }
+                },
+
+                )
+
+        }
+
+    }
+
+}
+
 
 @Composable
 fun AlertDialogExample(
@@ -104,7 +156,14 @@ fun AlertDialogExample(
     dialogTitle: String,
     dialogText: @Composable () -> Unit,
     icon: ImageVector,
-) {
+
+    ) {
+
+    Row(
+        Modifier.fillMaxSize()
+    ) {
+
+    }
     AlertDialog(
         icon = { Icon(icon, contentDescription = null) },
         title = { Text(text = dialogTitle) },
@@ -121,37 +180,62 @@ fun AlertDialogExample(
             }
         },
 
-    )
+        )
 }
 
 
-//@Preview
-//@Composable
-//fun AlertDialogExamplePreview() {
-//    val context = LocalContext.current
-//
-//
-//    Row(
-//        Modifier.fillMaxSize()
-//    ) {
-//
-//    }
-//    AlertDialogExample(
-//        onDismiss = {
-//            Toast.makeText(context, "no permission accepted", Toast.LENGTH_SHORT).show()
-//        },
-//        onConfirmation = {
-//            Toast.makeText(context, "permission accepted", Toast.LENGTH_SHORT).show()
-//        },
-//        dialogTitle = "Alert dialog example",
-//        dialogText = {
-//            Text(
-//                text = "This is an example of an alert dialog with buttons.".repeat(50)
-//            )
-//        },
-//        icon = Icons.Default.Info
-//    )
-//}
+@Preview(showBackground = true)
+@Composable
+fun JoinScreenPreview() {
+    val context = LocalContext.current
+    val scrollState = rememberScrollState()
+    var onBackgroundTap by remember {
+        mutableStateOf(true)
+    }
+
+
+    if (onBackgroundTap) {
+        JoinScreen(
+            onRequest = {
+                onBackgroundTap = false
+            },
+            onDismiss = {
+                Toast.makeText(
+                    context,
+                    "no permission accepted",
+                    Toast.LENGTH_SHORT
+                ).show()
+                onBackgroundTap = false
+            },
+            onConfirmation = {
+                Toast.makeText(
+                    context,
+                    "permission accepted",
+                    Toast.LENGTH_SHORT
+                ).show()
+                onBackgroundTap = false
+            },
+            dialogTitle = "Alert dialog example",
+            dialogText = {
+                Box(
+                    modifier = Modifier
+                        .height(200.dp) // 원하는 높이 지정
+                        .verticalScroll(scrollState)
+                        .padding(end = 12.dp)
+
+                ) {
+                    Text(
+                        text = "This is an example of an alert dialog with buttons.\n".repeat(
+                            50
+                        ) // 긴 텍스트 예시
+                    )
+                }
+
+            },
+            icon = Icons.Default.Info
+        )
+    }
+}
 
 
 
