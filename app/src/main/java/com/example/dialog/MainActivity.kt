@@ -1,5 +1,6 @@
 package com.example.dialog
 
+import android.content.Context
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -26,12 +27,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-
-
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.dialog.ui.theme.DialogTheme
 
@@ -50,23 +48,9 @@ class MainActivity : ComponentActivity() {
                 JoinScreen(
                     showDialog = showDialog,
                     onToggleDialog = { showDialog = !showDialog },
-                    onDismiss = {
-                        Toast.makeText(
-                            context,
-                            "no permission accepted",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        showDialog = !showDialog
-
-                    },
-                    onConfirmation = {
-                        Toast.makeText(
-                            context,
-                            "permission accepted",
-                            Toast.LENGTH_SHORT
-                        ).show()
-
-                    },
+                    toastMessage = { message -> showToast(context, message) },
+                    confirmMessage = "permission accepted",
+                    dismissMessage = "no permission accepted",
                     dialogTitle = "Alert dialog example",
                     dialogText = {
                         Box(
@@ -92,17 +76,25 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+fun showToast(context: Context, toastMessage: String) {
+    Toast.makeText(
+        context,
+        toastMessage,
+        Toast.LENGTH_SHORT
+    ).show()
+}
+
 @Composable
 fun JoinScreen(
     showDialog: Boolean,
     onToggleDialog: () -> Unit,
-    onDismiss: () -> Unit,
-    onConfirmation: () -> Unit,
+    toastMessage: (String) -> Unit,
+    confirmMessage: String,
+    dismissMessage: String,
     dialogTitle: String,
     dialogText: @Composable () -> Unit,
     icon: ImageVector,
 ) {
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -124,12 +116,18 @@ fun JoinScreen(
                 text = { dialogText() },
                 onDismissRequest = onToggleDialog,
                 confirmButton = {
-                    TextButton(onClick = onConfirmation) {
+                    TextButton(onClick = {
+                        onToggleDialog()
+                        toastMessage(confirmMessage)
+                    }) {
                         Text("Confirm")
                     }
                 },
                 dismissButton = {
-                    Button(onClick = onDismiss) {
+                    Button(onClick = {
+                        onToggleDialog()
+                        toastMessage(dismissMessage)
+                    }) {
                         Text("Dismiss")
                     }
                 },
@@ -142,60 +140,6 @@ fun JoinScreen(
 
 }
 
-
-@Preview(showBackground = true)
-@Composable
-fun JoinScreenPreview() {
-    DialogTheme {
-        val context = LocalContext.current
-        val scrollState = rememberScrollState()
-        val showDialog by remember {
-            mutableStateOf(false)
-        }
-
-        JoinScreen(
-            showDialog = showDialog,
-            onToggleDialog = { showDialog != showDialog },
-            onDismiss = {
-                Toast.makeText(
-                    context,
-                    "no permission accepted",
-                    Toast.LENGTH_SHORT
-                ).show()
-                showDialog != showDialog
-
-
-            },
-            onConfirmation = {
-                Toast.makeText(
-                    context,
-                    "permission accepted",
-                    Toast.LENGTH_SHORT
-                ).show()
-
-            },
-            dialogTitle = "Alert dialog example",
-            dialogText = {
-                Box(
-                    modifier = Modifier
-                        .height(200.dp) // 원하는 높이 지정
-                        .verticalScroll(scrollState)
-                        .padding(end = 12.dp)
-
-                ) {
-                    Text(
-                        text = "This is an example of an alert dialog with buttons.\n".repeat(
-                            50
-                        ) // 긴 텍스트 예시
-                    )
-                }
-
-            },
-            icon = Icons.Default.Info
-        )
-
-    }
-}
 
 
 
