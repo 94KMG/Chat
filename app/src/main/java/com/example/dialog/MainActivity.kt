@@ -7,7 +7,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -44,70 +43,66 @@ class MainActivity : ComponentActivity() {
             DialogTheme {
                 val context = LocalContext.current
                 val scrollState = rememberScrollState()
-                var onBackgroundTap by remember {
-                    mutableStateOf(true)
+                var showDialog by remember {
+                    mutableStateOf(false)
                 }
 
+                JoinScreen(
+                    showDialog = showDialog,
+                    onToggleDialog = { showDialog = !showDialog },
+                    onDismiss = {
+                        Toast.makeText(
+                            context,
+                            "no permission accepted",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        showDialog = !showDialog
 
-                if (onBackgroundTap) {
-                    JoinScreen(
-                        onRequest = {
-                            onBackgroundTap = false
-                        },
-                        onDismiss = {
-                            Toast.makeText(
-                                context,
-                                "no permission accepted",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                            onBackgroundTap = false
-                        },
-                        onConfirmation = {
-                            Toast.makeText(
-                                context,
-                                "permission accepted",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                            onBackgroundTap = false
-                        },
-                        dialogTitle = "Alert dialog example",
-                        dialogText = {
-                            Box(
-                                modifier = Modifier
-                                    .height(200.dp) // 원하는 높이 지정
-                                    .verticalScroll(scrollState)
-                                    .padding(end = 12.dp)
+                    },
+                    onConfirmation = {
+                        Toast.makeText(
+                            context,
+                            "permission accepted",
+                            Toast.LENGTH_SHORT
+                        ).show()
 
-                            ) {
-                                Text(
-                                    text = "This is an example of an alert dialog with buttons.\n".repeat(
-                                        50
-                                    ) // 긴 텍스트 예시
-                                )
-                            }
+                    },
+                    dialogTitle = "Alert dialog example",
+                    dialogText = {
+                        Box(
+                            modifier = Modifier
+                                .height(200.dp) // 원하는 높이 지정
+                                .verticalScroll(scrollState)
+                                .padding(end = 12.dp)
 
-                        },
-                        icon = Icons.Default.Info
-                    )
-                }
+                        ) {
+                            Text(
+                                text = "This is an example of an alert dialog with buttons.\n".repeat(
+                                    50
+                                ) // 긴 텍스트 예시
+                            )
+                        }
+
+                    },
+                    icon = Icons.Default.Info
+                )
+
             }
         }
     }
 }
 
-
 @Composable
 fun JoinScreen(
-    onRequest: () -> Unit,
+    showDialog: Boolean,
+    onToggleDialog: () -> Unit,
     onDismiss: () -> Unit,
     onConfirmation: () -> Unit,
     dialogTitle: String,
     dialogText: @Composable () -> Unit,
     icon: ImageVector,
 ) {
-    var showDialog by remember {
-        mutableStateOf(false)
-    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -116,7 +111,7 @@ fun JoinScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Button(onClick = {
-            showDialog = !showDialog
+            onToggleDialog()
 
         }) {
             Text(text = "Do you want join the chat")
@@ -127,7 +122,7 @@ fun JoinScreen(
                 icon = { Icon(icon, contentDescription = null) },
                 title = { Text(text = dialogTitle) },
                 text = { dialogText() },
-                onDismissRequest = onRequest,
+                onDismissRequest = onToggleDialog,
                 confirmButton = {
                     TextButton(onClick = onConfirmation) {
                         Text("Confirm")
@@ -148,64 +143,28 @@ fun JoinScreen(
 }
 
 
-@Composable
-fun AlertDialogExample(
-    onRequest: () -> Unit,
-    onDismiss: () -> Unit,
-    onConfirmation: () -> Unit,
-    dialogTitle: String,
-    dialogText: @Composable () -> Unit,
-    icon: ImageVector,
-
-    ) {
-
-    Row(
-        Modifier.fillMaxSize()
-    ) {
-
-    }
-    AlertDialog(
-        icon = { Icon(icon, contentDescription = null) },
-        title = { Text(text = dialogTitle) },
-        text = { dialogText() },
-        onDismissRequest = onRequest,
-        confirmButton = {
-            TextButton(onClick = onConfirmation) {
-                Text("Confirm")
-            }
-        },
-        dismissButton = {
-            Button(onClick = onDismiss) {
-                Text("Dismiss")
-            }
-        },
-
-        )
-}
-
-
 @Preview(showBackground = true)
 @Composable
 fun JoinScreenPreview() {
-    val context = LocalContext.current
-    val scrollState = rememberScrollState()
-    var onBackgroundTap by remember {
-        mutableStateOf(true)
-    }
+    DialogTheme {
+        val context = LocalContext.current
+        val scrollState = rememberScrollState()
+        val showDialog by remember {
+            mutableStateOf(false)
+        }
 
-
-    if (onBackgroundTap) {
         JoinScreen(
-            onRequest = {
-                onBackgroundTap = false
-            },
+            showDialog = showDialog,
+            onToggleDialog = { showDialog != showDialog },
             onDismiss = {
                 Toast.makeText(
                     context,
                     "no permission accepted",
                     Toast.LENGTH_SHORT
                 ).show()
-                onBackgroundTap = false
+                showDialog != showDialog
+
+
             },
             onConfirmation = {
                 Toast.makeText(
@@ -213,7 +172,7 @@ fun JoinScreenPreview() {
                     "permission accepted",
                     Toast.LENGTH_SHORT
                 ).show()
-                onBackgroundTap = false
+
             },
             dialogTitle = "Alert dialog example",
             dialogText = {
@@ -234,6 +193,7 @@ fun JoinScreenPreview() {
             },
             icon = Icons.Default.Info
         )
+
     }
 }
 
